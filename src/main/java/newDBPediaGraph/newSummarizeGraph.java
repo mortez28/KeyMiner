@@ -1,19 +1,21 @@
-package Summarize;
+package newDBPediaGraph;
 
 import DBPediaGraph.DBPediaDataGraph;
 import Infra.DataNode;
 import Infra.NodeType;
 import Infra.RelationshipEdge;
 import Infra.candidateKey;
+import newDataTypes.entityNode;
+import newDataTypes.literalProperty;
 
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public class summarizeGraph {
+public class newSummarizeGraph {
 
-    private DBPediaDataGraph dataGraph;
+    private newGraphLoader dataGraph;
 
 
     private HashMap<String, HashSet<Neighbor>> summarize = new HashMap<>();
@@ -27,11 +29,11 @@ public class summarizeGraph {
     //public HashMap<String, ArrayList<String>> superTypes = new HashMap<String, ArrayList<String>>();
 
 
-    public summarizeGraph(DBPediaDataGraph dataGraph, double minimumCoverage, String keySavePath)
+    public newSummarizeGraph(newGraphLoader dataGraph, double minimumCoverage, String keySavePath, Boolean findAll)
     {
         this.dataGraph=dataGraph;
         doSummarization();
-        saveData(keySavePath,minimumCoverage);
+        saveData(keySavePath,minimumCoverage, findAll);
 
     }
 
@@ -42,7 +44,7 @@ public class summarizeGraph {
 
     private void doSummarization() {
 
-        for (DataNode node : dataGraph.getDataGraph().vertexSet())
+        for (entityNode node : dataGraph.getDataGraph().vertexSet())
         {
 
             //alreadyVisited.clear();
@@ -55,22 +57,20 @@ public class summarizeGraph {
                 }
             }
 
+            for (literalProperty lit:node.getAllLiterals()) {
+                for (String sourceType : node.getTypes()) {
+                    refineSummarizeGraph(node.getHashCode(), sourceType, "*", lit.getPredicate());
+                }
+            }
+
             Set<RelationshipEdge> relationshipEdges = dataGraph.getDataGraph().edgesOf(node);
             for (RelationshipEdge edge : relationshipEdges)
             {
-                DataNode dest=dataGraph.getDataGraph().getEdgeTarget(edge);
-                if(dest.getNodeType()== NodeType.Literal)
-                {
-                    for (String sourceType : node.getTypes()) {
-                        refineSummarizeGraph(node.getNodeName().hashCode(),sourceType, "*", edge.getLabel());
-                    }
-                }
-                else if(dest.getNodeType()== NodeType.Entity)
-                {
-                    for (String sourceType : node.getTypes()) {
-                        for (String destType : dest.getTypes()) {
-                            refineSummarizeGraph(node.getNodeName().hashCode(), sourceType, destType, edge.getLabel());
-                        }
+                entityNode dest=dataGraph.getDataGraph().getEdgeTarget(edge);
+
+                for (String sourceType : node.getTypes()) {
+                    for (String destType : dest.getTypes()) {
+                        refineSummarizeGraph(node.getHashCode(), sourceType, destType, edge.getLabel());
                     }
                 }
             }
@@ -118,7 +118,7 @@ public class summarizeGraph {
         return null;
     }
 
-    private void saveData(String savingPath, double threshold) {
+    private void saveData(String savingPath, double threshold, Boolean findAll) {
         try {
 
             FileWriter writer = new FileWriter(savingPath);
@@ -140,8 +140,8 @@ public class summarizeGraph {
                                 + "\t" + cc;
                         writer.write(line + "\n");
                         written=true;
-                        if(!distinctTypes.contains(key))
-                            distinctTypes.add(key);
+
+                        distinctTypes.add(key);
 
                         candidateKey cKey=new candidateKey(neighbor.getOnt(),neighbor.getType(),neighbor.getCount(),cc);
                         if(!CandidateKeys.containsKey(key))
@@ -158,7 +158,7 @@ public class summarizeGraph {
                     	atLeastOneKey.setValue(neighbor.getType());
                     }
                 }
-                if(!written) {
+                if(!written && findAll) {
                     int max=-1;
                     String best="";
                     for (Neighbor neighbor : summarize.get(key)) {

@@ -1,31 +1,25 @@
 package Infra;
 
-public class candidateKey {
+import newDataTypes.propertyBase;
 
-    private String predicate;
-    private String object;
+public class candidateKey extends propertyBase {
 
-    public candidateKey(String pred, String obj)
+    private int support, max;
+
+    public candidateKey(String pred, String obj, int support, int max)
     {
-        this.predicate=pred;
-        this.object=obj;
+        super(pred,obj);
+        this.support=support;
+        this.max=max;
     }
 
-    public String getPredicate()
+    public int getSupport()
     {
-        return predicate;
+        return support;
     }
 
-    public String getObject()
+    public int getMax()
     {
-        return object;
-    }
-
-    public void setObject(String object) {
-        this.object = object;
-    }
-
-    public void setPredicate(String predicate) {
-        this.predicate = predicate;
+        return max;
     }
 }
