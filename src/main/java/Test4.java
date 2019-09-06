@@ -22,7 +22,7 @@ public class Test4 {
 
         //summarizeGraph sum=new summarizeGraph(graph,0.3, "F:\\MorteZa\\Datasets\\Statistical\\"+year+"\\Keys_"+name+".txt");
 
-        newSummarizeGraph sum=new newSummarizeGraph(graph,0.8, "F:\\MorteZa\\Datasets\\Statistical\\"+year+"\\Keys_"+name+".txt",false);
+        newSummarizeGraph sum=new newSummarizeGraph(graph,0.8, "F:\\MorteZa\\Datasets\\Statistical\\"+year+"\\Candidate_Keys_"+name+".txt",false);
 
         MinerMainClass miner=new MinerMainClass(graph,sum,0.8,1);
 
