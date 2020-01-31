@@ -40,6 +40,11 @@ public class candidateNodeForAKey extends entityBase {
         }
     }
 
+    public int getNeighborCount()
+    {
+        return this.allNeighborsInTheKey.size();
+    }
+
     public void setAllNeighborsToInvestigate(HashSet<candidateKey> candidates)
     {
         for (candidateKey key:candidates) {
@@ -53,7 +58,7 @@ public class candidateNodeForAKey extends entityBase {
     }
 
 
-    public void createLattice()
+    public void createLattice(int maximumSizeOfTheKey)
     {
         List<String> allNames=new ArrayList<>();
         for (candidateKey key: allNeighborsInTheKey) {
@@ -70,8 +75,11 @@ public class candidateNodeForAKey extends entityBase {
             level.add(temp);
             accumulateLevel.add(temp);
         }
+        int levelCount=1;
         while (true)
         {
+            if(++levelCount>maximumSizeOfTheKey)
+                break;
             List<Set<String>> newLevel=new ArrayList<>();
             for (int i=0;i<level.size();i++)
             {
@@ -80,7 +88,8 @@ public class candidateNodeForAKey extends entityBase {
                     Set<String> temp=new HashSet<>();
                     temp.addAll(level.get(i));
                     temp.addAll(level.get(j));
-                    boolean exist=false;
+
+                    /*boolean exist=false;
                     for (Set<String> t:newLevel) {
                         if(t.equals(temp)) {
                             exist = true;
@@ -88,7 +97,11 @@ public class candidateNodeForAKey extends entityBase {
                         }
                     }
                     if(!exist)
+                        newLevel.add(temp);*/
+
+                    if(temp.size()==levelCount && !newLevel.contains(temp))
                         newLevel.add(temp);
+
                 }
             }
             if(newLevel.isEmpty())
@@ -98,6 +111,7 @@ public class candidateNodeForAKey extends entityBase {
                 accumulateLevel.addAll(newLevel);
                 level.clear();
                 level.addAll(newLevel);
+                //System.out.println(newLevel.get(0).size() + " -- " + newLevel.size());
             }
         }
         for (Set<String> t:accumulateLevel) {
